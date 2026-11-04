@@ -1,0 +1,130 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  HOMEBREW_NO_ANALYTICS: '1'
+  HOMEBREW_NO_AUTO_UPDATE: '1'
+  HOMEBREW_NO_ENV_HINTS: '1'
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec prettier --check .
+
+  renovate:
+    name: Renovate config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # YapYap's Renovate workflow reports a broken config only once it runs;
+      # this catches it here, with the same Renovate.
+      - name: Validate .github/renovate.json
+        run: >-
+          docker run --rm -v "$PWD:/repo:ro" -w /repo
+          ghcr.io/renovatebot/renovate:44.206.2
+          renovate-config-validator --strict --no-global .github/renovate.json
+
+  audit:
+    name: Style and audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Homebrew's own image, so the casks are checked by the Homebrew users
+      # get, without a macOS runner. Homebrew reads casks only from taps, and
+      # from a third-party tap only once it is trusted, so they go into a
+      # fresh local one.
+      - name: Check the casks with brew style and brew audit
+        env:
+          BREW_IMAGE: ghcr.io/homebrew/brew:latest@sha256:6c82981323b11a72e0949e40bf0ba25587870fd81314d4b1a62e531201c1238f
+        run: |
+          docker run --rm -v "$PWD/Casks:/casks:ro" \
+            -e HOMEBREW_NO_ANALYTICS -e HOMEBREW_NO_AUTO_UPDATE -e HOMEBREW_NO_ENV_HINTS \
+            "$BREW_IMAGE" bash -euo pipefail -c '
+              brew tap-new --no-git vascoguita/yapyap > /dev/null
+              brew trust vascoguita/yapyap
+              tap=$(brew --repository vascoguita/yapyap)
+              mkdir -p "$tap/Casks"
+              cp /casks/*.rb "$tap/Casks/"
+              brew style --cask vascoguita/yapyap/yapyap vascoguita/yapyap/yapyap@beta
+              brew audit --cask --strict vascoguita/yapyap/yapyap vascoguita/yapyap/yapyap@beta'
+
+  install:
+    name: Install ${{ matrix.cask }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cask: [yapyap, yapyap@beta]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Tap this checkout
+        run: |
+          brew tap-new --no-git vascoguita/yapyap > /dev/null
+          brew trust vascoguita/yapyap
+          tap=$(brew --repository vascoguita/yapyap)
+          mkdir -p "$tap/Casks"
+          cp Casks/*.rb "$tap/Casks/"
+      # The online audit downloads the DMG and opens it, which only macOS can.
+      - name: Audit with the download
+        env:
+          CASK: ${{ matrix.cask }}
+        run: brew audit --cask --strict --online "vascoguita/yapyap/$CASK"
+      # Installing checks the download against the cask's SHA-256.
+      - name: Install
+        env:
+          CASK: ${{ matrix.cask }}
+        run: brew install --cask "vascoguita/yapyap/$CASK"
+      # The casks promise a build Gatekeeper opens without a warning, which
+      # only a valid signature and Apple's notarization give.
+      - name: Check the signature and notarization
+        run: |
+          codesign --verify --deep --strict --verbose=2 /Applications/YapYap.app
+          spctl --assess --type execute --verbose=2 /Applications/YapYap.app
+          xcrun stapler validate /Applications/YapYap.app
+      - name: Uninstall with its data
+        env:
+          CASK: ${{ matrix.cask }}
+        run: |
+          brew uninstall --cask --zap "vascoguita/yapyap/$CASK"
+          test ! -e /Applications/YapYap.app
+
+  result:
+    name: CI result
+    needs: [format, renovate, audit, install]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check every job passed
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          echo "$NEEDS" | jq -e 'all(.[]; .result == "success")' > /dev/null

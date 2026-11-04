@@ -1,0 +1,79 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Weekly updates for every pinned version, as in YapYap (its ADR 0020). YapYap's Renovate workflow runs daily, so open pull requests are rebased and merged in between. The casks follow YapYap's releases instead.",
+  "timezone": "UTC",
+  "schedule": ["* * * * 1"],
+  "minimumReleaseAge": "3 days",
+  "semanticCommits": "enabled",
+  "rangeStrategy": "bump",
+  "automergeStrategy": "merge-commit",
+  "ignorePaths": ["Casks/**"],
+  "packageRules": [
+    {
+      "matchManagers": ["npm"],
+      "semanticCommitType": "build"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "semanticCommitType": "ci"
+    },
+    {
+      "matchManagers": ["npm", "github-actions"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "minor, patch and digest updates",
+      "automerge": true
+    },
+    {
+      "description": "The engines field follows .nvmrc through the Node.js custom manager below.",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["engines"],
+      "matchPackageNames": ["node"],
+      "enabled": false
+    },
+    {
+      "matchDepNames": ["node"],
+      "matchManagers": ["nvm", "custom.regex"],
+      "semanticCommitType": "build",
+      "groupName": "Node.js LTS"
+    },
+    {
+      "description": "Renovate itself, which YapYap's workflow runs and CI validates this file with.",
+      "matchPackageNames": ["ghcr.io/renovatebot/renovate"],
+      "semanticCommitType": "ci",
+      "groupName": "Renovate"
+    },
+    {
+      "description": "The Homebrew image the casks are checked in.",
+      "matchPackageNames": ["ghcr.io/homebrew/brew"],
+      "semanticCommitType": "ci"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "The oldest Node.js the formatting check accepts, kept equal to .nvmrc.",
+      "managerFilePatterns": ["/^package\\.json$/"],
+      "matchStrings": ["\"node\":\\s*\">=(?<currentValue>[^\"]+)\""],
+      "depNameTemplate": "node",
+      "datasourceTemplate": "node-version",
+      "versioningTemplate": "node"
+    },
+    {
+      "customType": "regex",
+      "description": "The Renovate image CI validates this file with.",
+      "managerFilePatterns": ["/^\\.github/workflows/ci\\.yml$/"],
+      "matchStrings": ["ghcr\\.io/renovatebot/renovate:(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      "depNameTemplate": "ghcr.io/renovatebot/renovate",
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "The Homebrew image the casks are checked in, pinned by digest.",
+      "managerFilePatterns": ["/^\\.github/workflows/ci\\.yml$/"],
+      "matchStrings": [
+        "BREW_IMAGE: (?<depName>ghcr\\.io/homebrew/brew):(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[0-9a-f]{64})"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
