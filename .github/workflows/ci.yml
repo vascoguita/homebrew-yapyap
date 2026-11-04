@@ -93,10 +93,16 @@ jobs:
           mkdir -p "$tap/Casks"
           cp Casks/*.rb "$tap/Casks/"
       # The online audit downloads the DMG and opens it, which only macOS can.
+      # It refuses a GitHub pre-release, which is what the beta cask is for.
       - name: Audit with the download
         env:
           CASK: ${{ matrix.cask }}
-        run: brew audit --cask --strict --online "vascoguita/yapyap/$CASK"
+        run: |
+          except=()
+          if [ "$CASK" = yapyap@beta ]; then
+            except=(--except github_prerelease_version)
+          fi
+          brew audit --cask --strict --online "${except[@]}" "vascoguita/yapyap/$CASK"
       # Installing checks the download against the cask's SHA-256.
       - name: Install
         env:
