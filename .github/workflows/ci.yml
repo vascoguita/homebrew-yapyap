@@ -97,6 +97,9 @@ jobs:
       - name: Audit with the download
         env:
           CASK: ${{ matrix.cask }}
+          # The audit asks GitHub's API about the release; runners share
+          # addresses, so unauthenticated requests run into its rate limit.
+          HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
         run: |
           except=()
           if [ "$CASK" = yapyap@beta ]; then
