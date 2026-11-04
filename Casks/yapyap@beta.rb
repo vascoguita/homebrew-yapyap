@@ -14,7 +14,7 @@ cask "yapyap@beta" do
 
   auto_updates true
   conflicts_with cask: "yapyap"
-  depends_on :macos
+  depends_on macos: :ventura
 
   app "YapYap.app"
 
