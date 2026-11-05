@@ -42,6 +42,27 @@ pnpm exec prettier --check .
 [Renovate](https://docs.renovatebot.com/), run by YapYap's workflow, keeps the
 pinned actions and tools up to date. Releases happen in YapYap, never here.
 
+## OpenSSF Scorecard checks below 10
+
+Scorecard (`scorecard.yml`) rates the repository on every push to `master`
+and weekly. These checks stay below 10 on purpose or for now, as in YapYap,
+and their alerts stay open rather than being dismissed:
+
+- **Code-Review:** YapYap has one maintainer, so pull requests are not
+  approved by a second person. Every change still goes through a pull
+  request with the required checks. A required approving review would
+  block all merging until there is a second maintainer.
+- **Branch-Protection:** the `master` ruleset requires a pull request,
+  signed commits and the required checks, and forbids force pushes and
+  deletion. It does not require approvals, dismiss stale reviews or code
+  owner review, for the reason above.
+- **Fuzzing:** the repository holds two generated casks and its workflows,
+  no code that parses input, so there is nothing to fuzz. YapYap's own
+  property tests cover the generator.
+- **CII-Best-Practices:** the OpenSSF Best Practices badge is YapYap's; this
+  tap has none of its own.
+- **Maintained:** the repository is younger than 90 days.
+
 ## Repository settings
 
 Merge commits only (squash and rebase disabled), auto-merge allowed, head

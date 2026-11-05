@@ -1,5 +1,19 @@
 # YapYap for Homebrew
 
+[![CI](https://github.com/vascoguita/homebrew-yapyap/actions/workflows/ci.yml/badge.svg)](https://github.com/vascoguita/homebrew-yapyap/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/vascoguita/homebrew-yapyap/actions/workflows/codeql.yml/badge.svg)](https://github.com/vascoguita/homebrew-yapyap/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/vascoguita/homebrew-yapyap/badge)](https://scorecard.dev/viewer/?uri=github.com/vascoguita/homebrew-yapyap)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=vascoguita_homebrew-yapyap&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=vascoguita_homebrew-yapyap)
+[![Reliability](https://sonarcloud.io/api/project_badges/measure?project=vascoguita_homebrew-yapyap&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=vascoguita_homebrew-yapyap)
+[![Security](https://sonarcloud.io/api/project_badges/measure?project=vascoguita_homebrew-yapyap&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=vascoguita_homebrew-yapyap)
+[![Maintainability](https://sonarcloud.io/api/project_badges/measure?project=vascoguita_homebrew-yapyap&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=vascoguita_homebrew-yapyap)
+[![Duplicated lines](https://sonarcloud.io/api/project_badges/measure?project=vascoguita_homebrew-yapyap&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=vascoguita_homebrew-yapyap)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=vascoguita_homebrew-yapyap&metric=bugs)](https://sonarcloud.io/summary/new_code?id=vascoguita_homebrew-yapyap)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=vascoguita_homebrew-yapyap&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=vascoguita_homebrew-yapyap)
+[![Code smells](https://sonarcloud.io/api/project_badges/measure?project=vascoguita_homebrew-yapyap&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=vascoguita_homebrew-yapyap)
+
 The [Homebrew](https://brew.sh) tap for [YapYap](https://yapyap.guita.org/),
 an unofficial desktop client for WhatsApp Web. YapYap is not affiliated with
 WhatsApp or Meta.
