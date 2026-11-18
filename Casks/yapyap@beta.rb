@@ -1,6 +1,6 @@
 cask "yapyap@beta" do
-  version "0.3.1-beta.4"
-  sha256 "def805f15837b11ac55d29c27660ab51e0a3dd88025c0cb8f5107d224c9ff81c"
+  version "0.3.1-beta.5"
+  sha256 "f96b0567fc94e9355ef7fbf45546cdc53733321e679b593b446e4a43200b1612"
 
   url "https://github.com/vascoguita/yapyap/releases/download/v#{version}/YapYap-#{version}-mac-universal.dmg",
       verified: "github.com/vascoguita/yapyap/"
