@@ -3,11 +3,11 @@
   "private": true,
   "description": "Homebrew tap for YapYap; only the formatting check runs on Node.js",
   "license": "MIT",
-  "packageManager": "pnpm@12.18.0",
+  "packageManager": "pnpm@12.21.0",
   "engines": {
     "node": ">=26.13.0"
   },
   "devDependencies": {
-    "prettier": "3.9.10"
+    "prettier": "3.10.1"
   }
 }
